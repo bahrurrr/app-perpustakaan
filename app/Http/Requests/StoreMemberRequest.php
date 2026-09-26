@@ -24,12 +24,12 @@ class StoreMemberRequest extends FormRequest
     {
         return [
             'nama' => 'required|string|max:100',
-            'nim' => 'required|string|max:50',
-            'email' => 'required|string|max:100',
+            'nim' => 'required|string|max:50|unique:members,nim',
+            'email' => 'required|string|email|max:100|unique:members,email',
             'nomor_telepon' => 'required|string|max:15',
             'alamat' => 'required|string|max:100',
-            'status' => 'required|string|max:20',
-            ];
+            'status' => 'required|string|in:aktif,nonaktif',
+        ];
     }
 
     public function messages(): array
@@ -40,7 +40,7 @@ class StoreMemberRequest extends FormRequest
             'email.required' => 'Email member wajib diisi',
             'nomor_telepon.required' => 'Nomor telepon member wajib diisi',
             'alamat.required' => 'Alamat member wajib diisi',
-            'status.required' => 'Status member wajin diisi',
+            'status.required' => 'Status member wajib diisi',
         ];
     }
 }
