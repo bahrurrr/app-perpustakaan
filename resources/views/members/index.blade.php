@@ -5,13 +5,8 @@
 
 @section('content')
     <h1>Daftar Anggota</h1>
-    <p><a href="{{ route('members.create') }}" class="btn">+ Tambah Anggota</a></p>
 
-    <form action="{{ route('members.index') }}" method="GET" style="margin-bottom: 16px;">
-        <input type="text" name="search" placeholder="Cari nama anggota..." value="{{ request('search') }}"
-            style="width: 250px; display: inline-block; padding: 6px;">
-        <button type="submit" class="btn">Cari</button>
-    </form>
+    <p><a href="{{ route('members.create') }}" class="btn">+ Tambah Anggota</a></p>
 
     <table>
         <thead>
@@ -54,6 +49,5 @@
         </tbody>
     </table>
 
-    {{ $members->appends(request()->query())->links() }}
-    {{-- <p><em>Catatan: data di atas masih data dummy (array statis di Controller). Form tambah/edit anggota dan CRUD lengkap anggota baru dibuat mulai Pertemuan 5.</em></p> --}}
+    {{ $members->links() }}
 @endsection

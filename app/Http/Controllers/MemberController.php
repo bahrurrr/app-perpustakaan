@@ -5,26 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreMemberRequest;
 use Illuminate\Http\Request;
 use App\Models\Member;
+
 class MemberController extends Controller
 {
     public function index()
     {
-        // Logika pencarian nama sekaligus pagination
-        $members = Member::when(request('search'), function ($query, $search) {
-            $query->where('nama', 'like', "%{$search}%");
-        })->paginate(10);
+        $members = Member::paginate(10);
 
         return view('members.index', compact('members'));
-    }
-
-    public function store(StoreMemberRequest $request)
-    {
-        $validated = $request->validated();
-        
-        Member::create($validated); // Simpan ke database asli
-
-        return redirect()->route('members.index')
-            ->with('success', "Member \"{$validated['nama']}\" berhasil ditambahkan.");
     }
 
     public function create()
@@ -32,17 +20,20 @@ class MemberController extends Controller
         return view('members.create');
     }
 
-    public function show(string $id)
+    public function store(StoreMemberRequest $request)
     {
-        $member = Member::findOrFail($id);
+        $validated = $request->validated();
 
-        return view('members.show', compact('member'));
+        Member::create($validated);
+
+        return redirect()->route('members.index')
+            ->with('success', "Anggota \"{$validated['nama']}\" berhasil ditambahkan.");
     }
 
     public function edit(string $id)
     {
         $member = Member::findOrFail($id);
-        
+
         return view('members.edit', compact('member'));
     }
 
@@ -52,18 +43,17 @@ class MemberController extends Controller
 
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
-            // Perhatikan tambahan ,'.$member->id supaya email/nim lama milik dia sendiri tidak dianggap bentrok
-            'nim' => 'required|string|max:50|unique:members,nim,'.$member->id,
-            'email' => 'required|string|email|max:100|unique:members,email,'.$member->id,
+            'nim' => 'required|string|max:20|unique:members,nim,' . $member->id,
+            'email' => 'required|email|max:100|unique:members,email,' . $member->id,
             'nomor_telepon' => 'required|string|max:15',
-            'alamat' => 'required|string|max:100',
-            'status' => 'required|string|in:aktif,nonaktif',
+            'alamat' => 'required|string',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
         $member->update($validated);
 
         return redirect()->route('members.index')
-            ->with('success', "Member \"{$validated['nama']}\" berhasil diperbarui.");
+            ->with('success', "Anggota \"{$validated['nama']}\" berhasil diperbarui.");
     }
 
     public function destroy(string $id)
@@ -72,6 +62,13 @@ class MemberController extends Controller
         $member->delete();
 
         return redirect()->route('members.index')
-            ->with('success', 'Member berhasil dihapus.');
+            ->with('success', 'Anggota berhasil dihapus.');
+    }
+
+    public function show(string $id)
+    {
+        $member = Member::with(['loans.loanItems.book', 'loans.user'])->findOrFail($id);
+
+        return view('members.show', compact('member'));
     }
 }
